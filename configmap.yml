@@ -1,0 +1,42 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    traefik.toml: |
+      graceTimeOut = 10
+      traefikLogsFile = "/log/traefik.log"
+      accessLogsFile = "/log/access.log"
+      logLevel = "INFO"
+      MaxIdleConnsPerHost = 60
+      InsecureSkipVerify = true
+      defaultEntryPoints = ["https","http"]
+      [entryPoints]
+        [entryPoints.http]
+        address = ":80"
+              [entryPoints.http.redirect]
+              regex = "^http://(.*).qingyidai.com/(.*)"
+              replacement = "https://$1.qingyidai.com/$2"
+
+      [entryPoints.https]
+      address = ":443"
+        [entryPoints.https.tls]
+          [[entryPoints.https.tls.certificates]]
+          certFile = "/ssl/qyd/tls.crt"
+          keyFile = "/ssl/qyd/tls.key"
+          [[entryPoints.https.tls.certificates]]
+          certFile = "/ssl/dfb/tls.crt"
+          keyFile = "/ssl/dfb/tls.key"
+      [metrics]
+        [metrics.prometheus]
+          entryPoint = "traefik"
+
+
+  kind: ConfigMap
+  metadata:
+    name: traefik-config
+    namespace: traefik
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
+

@@ -1,0 +1,83 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: traefik-ingress-lb
+  name: traefik-ingress-controller
+  namespace: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress-lb
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik-ingress-lb
+        name: traefik-ingress-lb
+    spec:
+      containers:
+      - args:
+        - --configFile=/etc/traefik/traefik.yml
+        - --api
+        - --kubernetes
+        image: itanony.com/repository/docker-hosted/test/treafik:v1.7.10
+        imagePullPolicy: IfNotPresent
+        name: traefik-ingress-lb
+        ports:
+        - containerPort: 80
+          hostPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 8080
+          hostPort: 8080
+          name: admin
+          protocol: TCP
+        - containerPort: 443
+          hostPort: 443
+          name: https
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/traefik/
+          name: config
+        - mountPath: /ssl/qyd/
+          name: qyd-cert
+        - mountPath: /ssl/dfb/
+          name: dfb-cert
+        - mountPath: /log/
+          name: logs
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      nodeSelector:
+        cpu: high
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: traefik-ingress-controller
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - name: qyd-cert
+        secret:
+          defaultMode: 420
+          secretName: qyd-tls-cert
+      - name: dfb-cert
+        secret:
+          defaultMode: 420
+          secretName: dfb-tls-cert
+      - configMap:
+          defaultMode: 420
+          name: traefik-config
+        name: config
+      - hostPath:
+          path: /var/log/traefik
+          type: ""
+        name: logs
