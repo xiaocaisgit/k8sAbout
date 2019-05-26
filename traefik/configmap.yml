@@ -14,8 +14,8 @@ items:
         [entryPoints.http]
         address = ":80"
               [entryPoints.http.redirect]
-              regex = "^http://(.*).qingyidai.com/(.*)"
-              replacement = "https://$1.qingyidai.com/$2"
+              regex = "^http://(.*).qyd.com/(.*)"
+              replacement = "https://$1.qyd.com/$2"
 
       [entryPoints.https]
       address = ":443"
