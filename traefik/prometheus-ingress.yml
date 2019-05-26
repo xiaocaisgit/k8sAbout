@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: kube-system
+spec:
+  rules:
+  - host: prometheus.qingyidai.com
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus
+          servicePort: prometheus
+        path: /
